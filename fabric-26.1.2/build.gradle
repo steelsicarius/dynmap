@@ -1,0 +1,72 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version '1.15.+'
+}
+
+base {
+    archivesName = "Dynmap"
+}
+
+version = parent.version
+group = parent.group
+
+eclipse {
+    project {
+        name = "Dynmap(Fabric-26.1.2)"
+    }
+}
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_25
+  targetCompatibility = JavaVersion.VERSION_25
+}
+
+configurations {
+    shadow
+    implementation.extendsFrom(shadow)
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+
+    shadow project(path: ':DynmapCore', configuration: 'shadow')
+
+    compileOnly "me.lucko:fabric-permissions-api:0.5.0" // revisar si hay build compatible con 26.1.x
+    compileOnly 'net.luckperms:api:5.4'
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/dynmap.accesswidener")
+}
+
+processResources {
+    filesMatching('fabric.mod.json') {
+        expand "version": project.version
+    }
+}
+
+java {
+    withSourcesJar()
+}
+
+jar {
+    from "LICENSE"
+    from {
+        configurations.shadow.collect { it.toString().contains("guava") ? null : it.isDirectory() ? it : zipTree(it) }
+    }
+    archiveFileName = "Dynmap-${project.version}-fabric-${project.minecraft_version}.jar"
+    destinationDirectory = file '../target'
+}
+
+jar.doLast {
+    task ->
+        ant.checksum file: task.archivePath
+}

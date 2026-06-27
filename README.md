@@ -1,5 +1,3 @@
-Fabric 26.1.2 - oracle java 25
-
 # Dynmap®  - dynamic web maps for Minecraft servers
 
 # Jump around the README
